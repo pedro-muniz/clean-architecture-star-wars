@@ -13,5 +13,4 @@ public class PlanetRepositoryConverter implements RepositoryConverter<PlanetEnti
     public Planet mapToDomain(final PlanetEntity planetEntity) {
         return new Planet(planetEntity.getId(), planetEntity.getName(), planetEntity.getTerrain(), planetEntity.getClimate());
     }
-
 }

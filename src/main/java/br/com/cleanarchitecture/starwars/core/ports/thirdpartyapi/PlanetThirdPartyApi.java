@@ -1,5 +1,7 @@
 package br.com.cleanarchitecture.starwars.core.ports.thirdpartyapi;
 
+import java.util.List;
+
 public interface PlanetThirdPartyApi {
-    String[] getPlanetMovies(String name);
+    List<String> getPlanetMovies(String name);
 }
