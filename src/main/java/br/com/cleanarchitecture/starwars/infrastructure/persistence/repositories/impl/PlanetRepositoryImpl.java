@@ -53,6 +53,6 @@ public class PlanetRepositoryImpl implements PlanetRepository {
 
     @Override
     public void delete(String id) {
-        planetMongoDbRepository.delete(id);
+        planetMongoDbRepository.deleteById(id);
     }
 }

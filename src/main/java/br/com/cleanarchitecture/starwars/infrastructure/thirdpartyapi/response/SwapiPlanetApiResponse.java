@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
-import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -17,12 +16,12 @@ public class SwapiPlanetApiResponse implements Serializable {
     private String created;
     private String diameter;
     private String edited;
-    List<String> films;
+    String[] films;
     private String gravity;
     private String name;
     private String orbital_period;
     private String population;
-    List<String> residents;
+    String[] residents;
     private String rotation_period;
     private String surface_water;
     private String terrain;
