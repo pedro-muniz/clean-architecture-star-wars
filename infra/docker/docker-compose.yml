@@ -1,0 +1,39 @@
+version: '3.6'
+
+services:
+  starwars:
+    build: .
+    restart: always
+    container_name: starwars
+    ports:
+      - 8080:8080
+    working_dir: /opt/app
+    depends_on:
+      - mongo
+    networks:
+      clusternetwork:
+        ipv4_address: 172.16.0.13
+
+  mongo:
+    image: mongo
+    container_name: mongo
+    hostname: mongo
+    environment:
+      - MONGODB_INITDB_DATABASE=starwars
+    ports:
+      - 27018:27017
+    networks:
+      clusternetwork:
+        ipv4_address: 172.16.0.14
+    volumes:
+      - $HOME/data/starwars-mongo-data:/data/db
+      - $HOME/data/starwars-mongo-bkp:/data/bkp
+    restart: always
+
+networks:
+  clusternetwork:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.0.0/24

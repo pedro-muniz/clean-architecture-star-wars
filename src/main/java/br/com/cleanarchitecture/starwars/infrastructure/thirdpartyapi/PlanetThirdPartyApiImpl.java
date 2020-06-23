@@ -70,7 +70,7 @@ public class PlanetThirdPartyApiImpl implements PlanetThirdPartyApi {
         }
 
         SwapiPlanetApiResponse swapiPlanetApiResponse = response.getResults().stream()
-                .filter(p -> p.getName().equals(name)).findFirst()
+                .filter(p -> p.getName().toLowerCase().equals(name.toLowerCase())).findFirst()
                 .orElseThrow(SwapiPlanetNotFoundException::new);
 
         if (ArrayUtils.isEmpty(swapiPlanetApiResponse.getFilms())) {
@@ -89,7 +89,7 @@ public class PlanetThirdPartyApiImpl implements PlanetThirdPartyApi {
         }
 
         SwapiPlanetApiResponse swapiPlanetApiResponse = response.getResults().stream()
-                .filter(p -> p.getName().equals(name)).findFirst()
+                .filter(p -> p.getName().toLowerCase().equals(name.toLowerCase())).findFirst()
                 .orElse(null);
 
         return swapiPlanetApiResponse != null;
