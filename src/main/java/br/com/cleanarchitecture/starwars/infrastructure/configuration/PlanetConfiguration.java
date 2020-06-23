@@ -35,17 +35,17 @@ public class PlanetConfiguration {
     }
 
     @Bean
-    public ManagePlanetUseCase createManagePlanetUseCase() {
-        return new ManagePlanetUseCaseImpl(createPlanetRepository());
-    }
-
-    @Bean
     public PlanetThirdPartyApi createPlanetThirdPartyApi() {
         return new PlanetThirdPartyApiImpl();
     }
 
     @Bean
-    public AddPlanetMoviesUseCase createGetPlanetMoviesUseCase() {
+    public ManagePlanetUseCase createManagePlanetUseCase() {
+        return new ManagePlanetUseCaseImpl(createPlanetRepository(), createPlanetThirdPartyApi());
+    }
+
+    @Bean
+    public AddPlanetMoviesUseCase createAddPlanetMoviesUseCase() {
         return new AddPlanetMoviesUseCaseImpl(createPlanetThirdPartyApi());
     }
 

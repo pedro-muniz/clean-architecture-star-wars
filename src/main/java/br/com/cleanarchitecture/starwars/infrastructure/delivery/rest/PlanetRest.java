@@ -25,5 +25,5 @@ public class PlanetRest implements Serializable {
 
     private List<String> movies;
 
-    private int appearances;
+    private Integer appearances;
 }

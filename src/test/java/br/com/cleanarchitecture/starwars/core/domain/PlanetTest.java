@@ -1,5 +1,6 @@
 package br.com.cleanarchitecture.starwars.core.domain;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -9,6 +10,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class PlanetTest {
     @Test
+    @DisplayName("Given a valid list of movies" +
+            "When addMoviesInfo to planet" +
+            "Then set list of movies and appearances")
     void addMoviesInfo_allGood_shouldPass(){
         //Arrange
         String fakeObjectId = "58d1c36efb0cac4e15afd202";

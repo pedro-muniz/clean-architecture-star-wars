@@ -2,7 +2,11 @@ package br.com.cleanarchitecture.starwars.core.usecases;
 
 import br.com.cleanarchitecture.starwars.core.domain.Planet;
 import br.com.cleanarchitecture.starwars.core.exceptions.PlanetAlreadyExistsException;
+import br.com.cleanarchitecture.starwars.core.exceptions.PlanetNotFoundException;
 import br.com.cleanarchitecture.starwars.core.ports.repository.PlanetRepository;
+import br.com.cleanarchitecture.starwars.core.ports.thirdpartyapi.PlanetThirdPartyApi;
+import br.com.cleanarchitecture.starwars.infrastructure.thirdpartyapi.exceptions.SwapiPlanetNotFoundException;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,19 +28,23 @@ class ManagePlanetUseCaseImplTest {
     @Mock
     private PlanetRepository planetRepository;
 
+    @Mock
+    private PlanetThirdPartyApi planetThirdPartyApi;
+
+
     private  ManagePlanetUseCase managePlanetUseCase;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
-        managePlanetUseCase = spy(new ManagePlanetUseCaseImpl(planetRepository));
+        managePlanetUseCase = spy(new ManagePlanetUseCaseImpl(planetRepository, planetThirdPartyApi));
     }
 
     @Test
     @DisplayName("Given a valid planet " +
             "When call save " +
             "Should verify if planet exists " +
-            "       not throws IllegalArgumentException or PlanetAlreadyExistsException" +
+            "       not throws IllegalArgumentException, SwapiPlanetNotFoundException or PlanetAlreadyExistsException" +
             "       and return a planet with id")
     void save_allGood_shouldPass() {
         //Arrange
@@ -46,6 +54,7 @@ class ManagePlanetUseCaseImplTest {
         Answer<Planet> repositoryAnswer = invocation -> new Planet(fakeObjectId, "Tatooine", "Dessert", "Arid");
 
         when(planetRepository.save(planet)).thenAnswer(repositoryAnswer);
+        when(planetThirdPartyApi.isPlanetExists(planet.getName())).thenReturn(true);
 
         //Com objetos "spy" uso o doReturn para que não haja efeito colateral no teste.
         doReturn(Optional.empty()).when(managePlanetUseCase).findByName(anyString());
@@ -58,10 +67,34 @@ class ManagePlanetUseCaseImplTest {
             fail("IllegalArgumentException throws with a valid planet");
         } catch (PlanetAlreadyExistsException planetAlreadyExistsException) {
             fail("IllegalArgumentException throws with a new planet");
+        } catch (SwapiPlanetNotFoundException swapiPlanetNotFoundException) {
+            fail("SwapiPlanetNotFoundException throws with a new valid planet");
         }
 
         //Assert
         assertSame(fakeObjectId, savedPlanet.getId());
+    }
+
+    @Test
+    @DisplayName("Given a nonexistent planet in swapi api " +
+            "When call save " +
+            "Should throws SwapiPlanetNotFoundException")
+    void save_nonExistentInSwapi_shouldThrowsSwapiPlanetNotFoundException() {
+        //Arrange
+        Planet planet = new Planet(null, "Tatooine", "Dessert", "Arid");
+
+        String fakeObjectId = "58d1c36efb0cac4e15afd202";
+        Answer<Planet> repositoryAnswer = invocation -> new Planet(fakeObjectId, "Tatooine", "Dessert", "Arid");
+
+        when(planetRepository.save(planet)).thenAnswer(repositoryAnswer);
+        when(planetThirdPartyApi.isPlanetExists(planet.getName())).thenReturn(false);
+
+        //Com objetos "spy" uso o doReturn para que não haja efeito colateral no teste.
+        doReturn(Optional.empty()).when(managePlanetUseCase).findByName(anyString());
+
+        assertThrows(SwapiPlanetNotFoundException.class, () -> {
+            managePlanetUseCase.save(planet);
+        });
     }
 
     @Test
@@ -130,9 +163,8 @@ class ManagePlanetUseCaseImplTest {
     @Test
     @DisplayName("Given user wants to get a planet by name " +
             "When call findByName with nonexistent planet name " +
-            "Then should not throw IllegalArgumentException" +
-            "   planet should not be present")
-    void findByName_allGood_shouldReturnOptionalEmpty() {
+            "Then should not throw PlanetNotFoundException")
+    void findByName_allGood_shouldThrowPlanetNotFound() {
         //Arrange
         String fakeName = "Tatooine";
         String fakeObjectId = "58d1c36efb0cac4e15afd202";
@@ -142,14 +174,9 @@ class ManagePlanetUseCaseImplTest {
         when(planetRepository.findOneByName(fakeName)).thenReturn(Optional.of(planet));
 
         //Act
-        Optional<Planet> repoPlanet = Optional.empty();
-        try {
-            repoPlanet = managePlanetUseCase.findByName(nonExistentName);
-        } catch (IllegalArgumentException e) {
-            fail("IllegalArgumentException throws with a valid planet");
-        }
-
-        assertFalse(repoPlanet.isPresent());
+        assertThrows(PlanetNotFoundException.class, () -> {
+            managePlanetUseCase.findById(nonExistentName);
+        });
     }
 
     @Test
@@ -192,9 +219,8 @@ class ManagePlanetUseCaseImplTest {
     @Test
     @DisplayName("Given user wants to get a planet by name " +
             "When call findById with nonexistent planet name " +
-            "Then should not throw IllegalArgumentException" +
-            "   planet should not be present")
-    void findById_allGood_shouldReturnOptionalEmpty() {
+            "Then should not throw PlanetNotFoundException")
+    void findById_allGood_shouldThrowPlanetNotFoundException() {
         //Arrange
         String fakeName = "Tatooine";
         String fakeObjectId = "58d1c36efb0cac4e15afd202";
@@ -203,14 +229,9 @@ class ManagePlanetUseCaseImplTest {
         when(planetRepository.findOneById(fakeObjectId)).thenReturn(Optional.of(planet));
 
         //Act
-        Optional<Planet> repoPlanet = Optional.empty();
-        try {
-            repoPlanet = managePlanetUseCase.findById(nonExistentId);
-        } catch (IllegalArgumentException e) {
-            fail("IllegalArgumentException throws with a valid planet");
-        }
-
-        assertFalse(repoPlanet.isPresent());
+        assertThrows(PlanetNotFoundException.class, () -> {
+            managePlanetUseCase.findById(nonExistentId);
+        });
     }
 
     @ParameterizedTest
@@ -223,5 +244,10 @@ class ManagePlanetUseCaseImplTest {
         assertThrows(IllegalArgumentException.class, () -> {
             managePlanetUseCase.delete(id);
         });
+    }
+
+    @AfterEach
+    void tearDown() {
+        managePlanetUseCase = null;
     }
 }

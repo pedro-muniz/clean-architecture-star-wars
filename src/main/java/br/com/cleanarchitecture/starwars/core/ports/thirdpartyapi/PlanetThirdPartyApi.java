@@ -4,4 +4,6 @@ import java.util.List;
 
 public interface PlanetThirdPartyApi {
     List<String> getPlanetMovies(String name);
+
+    boolean isPlanetExists(String name);
 }

@@ -62,7 +62,7 @@ public class PlanetThirdPartyApiImpl implements PlanetThirdPartyApi {
     }
 
     @Override
-    @Cacheable(value = "swapiGetPlanetApi", unless = "#result==null")
+    @Cacheable(value = "swapiGetPlanetMovies", unless = "#result==null")
     public List<String> getPlanetMovies(String name) {
         SwapiApiResponse response = getFromApi(name);
         if (response == null) {
@@ -78,5 +78,21 @@ public class PlanetThirdPartyApiImpl implements PlanetThirdPartyApi {
         }
 
         return Arrays.asList(swapiPlanetApiResponse.getFilms());
+    }
+
+    @Override
+    @Cacheable(value = "swapiIsPlanetExists")
+    public boolean isPlanetExists(String name) {
+        SwapiApiResponse response = getFromApi(name);
+        if (response == null) {
+            return false;
+        }
+
+        SwapiPlanetApiResponse swapiPlanetApiResponse = response.getResults().stream()
+                .filter(p -> p.getName().equals(name)).findFirst()
+                .orElse(null);
+
+        return swapiPlanetApiResponse != null;
+
     }
 }
