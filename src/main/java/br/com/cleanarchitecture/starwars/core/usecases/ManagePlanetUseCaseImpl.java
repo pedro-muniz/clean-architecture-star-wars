@@ -24,7 +24,7 @@ public class ManagePlanetUseCaseImpl implements ManagePlanetUseCase {
             throw new IllegalArgumentException("Invalid planet.");
         }
 
-        if (findByName(planet.getName()).isPresent()) {
+        if (planetRepository.findOneByName(planet.getName()).isPresent()) {
             throw new PlanetAlreadyExistsException();
         }
 
